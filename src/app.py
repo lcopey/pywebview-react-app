@@ -13,7 +13,10 @@ class PlotApi:
 
 
 def _path(path: str):
-    root = os.path.dirname(__file__)
+    try:
+        root = os.path.dirname(__file__)
+    except NameError:
+        root = "/home/laurent/Documents/Code/pywebview-react-app/src"
     path = os.path.join(root, path)
     if not os.path.exists(path):
         raise FileNotFoundError(path)
