@@ -1,8 +1,15 @@
 import webview
 import os
-from typing import Any, Literal
+import pandas as pd
+from typing import Any, Literal, TypedDict
 
 CALLBACKS = Literal["setFileSource"]
+
+
+class PlotApi:
+    class LoadFileResponse(TypedDict):
+        file_path: str
+        columns: list[str]
 
 
 def _path(path: str):
@@ -25,11 +32,18 @@ def setJsValue(value: Any, callback_name: CALLBACKS):
     window.evaluate_js(f"window.pywebview.state.{callback_name}({to_js(value)})")
 
 
-class Api:
-    def load_file(self):
+class PlotApi:
+    def load_file(self) -> PlotApi.LoadFileResponse:
         window = webview.windows[0]
         file = window.create_file_dialog(webview.OPEN_DIALOG)
-        setJsValue(file[0], "setFileSource")
+        file = file[0]
+        datas = pd.read_csv(file)
+        return {"file_path": file, "columns": list(datas.columns)}
+        # setJsValue(file[0], "setFileSource")
+
+
+class Api:
+    plot_api = PlotApi()
 
 
 DEBUG = True

@@ -6,22 +6,25 @@ import {
     Menu,
     MenuItem,
     Tooltip,
-} from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import FilePresent from "@mui/icons-material/FilePresent";
-import React, { useState } from "react";
-import { python_api, useWVGlobalState } from "../../utils";
+} from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import FilePresent from '@mui/icons-material/FilePresent';
+import React, { useState } from 'react';
+import { python_api } from '../../utils';
 
 export default function PlotMenu() {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const openMenu = (event: React.MouseEvent<HTMLElement>) =>
         setAnchorEl(event.currentTarget);
     const closeMenu = () => setAnchorEl(null);
+    const [sourceFile, setSourceFile] = useState<null | string>(null);
+
     const onLoadFileClick = () => {
-        python_api()?.load_file();
+        python_api()
+            ?.plot_api.load_file()
+            .then(({ file_path }) => setSourceFile(file_path));
         closeMenu();
     };
-    const [fileSource] = useWVGlobalState(null, "setFileSource");
 
     return (
         <Box sx={{ flexGrow: 1 }}>
@@ -38,8 +41,8 @@ export default function PlotMenu() {
                     <MenuIcon />
                 </IconButton>
                 <IconButton>
-                    {Boolean(fileSource) && (
-                        <Tooltip title={fileSource}>
+                    {Boolean(sourceFile) && (
+                        <Tooltip title={sourceFile}>
                             <FilePresent />
                         </Tooltip>
                     )}
@@ -47,8 +50,8 @@ export default function PlotMenu() {
                 <Menu
                     anchorEl={anchorEl}
                     anchorOrigin={{
-                        vertical: "top",
-                        horizontal: "left",
+                        vertical: 'top',
+                        horizontal: 'left',
                     }}
                     keepMounted
                     open={Boolean(anchorEl)}

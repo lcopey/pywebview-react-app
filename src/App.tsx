@@ -1,4 +1,4 @@
-import Plot from "./components/Plot/Plot";
+import Plot from './components/Plot/Plot';
 
 function App() {
     return <Plot />;
