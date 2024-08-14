@@ -2,7 +2,7 @@ import webview
 import os
 from typing import Any, Literal
 
-CALLBACKS = Literal['setLabel']
+CALLBACKS = Literal["setFileSource"]
 
 
 def _path(path: str):
@@ -29,8 +29,7 @@ class Api:
     def load_file(self):
         window = webview.windows[0]
         file = window.create_file_dialog(webview.OPEN_DIALOG)
-        setJsValue(file[0], "setLabel")
-        return file
+        setJsValue(file[0], "setFileSource")
 
 
 DEBUG = True

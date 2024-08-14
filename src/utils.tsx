@@ -1,25 +1,30 @@
 import { useEffect, useState } from "react";
 
-export function python_api() {
-  if ((window as any).pywebview) {
-    return (window as any).pywebview.api;
-  } else {
-    console.log("No instance of pywebview in window was found");
-  }
+type PythonCallable = () => void;
+interface PythonApi {
+    load_file: PythonCallable;
+}
+
+export function python_api(): undefined | PythonApi {
+    if ((window as any).pywebview) {
+        return (window as any).pywebview.api;
+    } else {
+        console.log("No instance of pywebview in window was found");
+    }
 }
 
 export function useWVGlobalState(init: any, name: string) {
-  const [value, setValue] = useState(init);
+    const [value, setValue] = useState(init);
 
-  useEffect(() => {
-    window.addEventListener("pywebviewready", function () {
-      const pywebview = (window as any).pywebview;
-      if (!pywebview.state) {
-        pywebview.state = {};
-      }
-      pywebview.state[name] = setValue;
+    useEffect(() => {
+        window.addEventListener("pywebviewready", function () {
+            const pywebview = (window as any).pywebview;
+            if (!pywebview.state) {
+                pywebview.state = {};
+            }
+            pywebview.state[name] = setValue;
+        });
     });
-  });
 
-  return [value, setValue];
+    return [value, setValue];
 }

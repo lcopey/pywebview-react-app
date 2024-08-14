@@ -1,7 +1,7 @@
-import AppContent from './components/AppContent/AppContent'
+import Plot from "./components/Plot/Plot";
 
 function App() {
-  return <AppContent/>
+    return <Plot />;
 }
 
-export default App
+export default App;
