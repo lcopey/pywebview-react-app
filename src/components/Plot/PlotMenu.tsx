@@ -24,16 +24,22 @@ type SelectMenuProps = {
 function SelectMenu({ label, id, values }: SelectMenuProps) {
     const labelId = `${id}-select-label`;
     let items =
-        values?.map((value) => <MenuItem value={value}>{value}</MenuItem>) ||
-        [];
+        values?.map((value, n) => (
+            <MenuItem key={n + 1} value={value}>
+                {value}
+            </MenuItem>
+        )) || [];
     items = [
-        <MenuItem>
+        <MenuItem key={0}>
             <em>None</em>
         </MenuItem>,
         ...items,
     ];
     return (
-        <FormControl sx={{ m: 1, minWidth: 120 }} variant="standard">
+        <FormControl
+            sx={{ mr: 1, ml: 1, pb: 2, minWidth: 120 }}
+            variant="standard"
+        >
             <InputLabel id={labelId}>{label}</InputLabel>
             <Select label={label} labelId={labelId}>
                 {items}
