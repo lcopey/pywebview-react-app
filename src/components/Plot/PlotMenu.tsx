@@ -3,105 +3,14 @@ import {
     Box,
     IconButton,
     Toolbar,
-    Menu,
     MenuItem,
     Tooltip,
-    Select,
-    FormControl,
-    InputLabel,
 } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
 import FilePresent from '@mui/icons-material/FilePresent';
-import React, { ReactNode, useState } from 'react';
+import { useState } from 'react';
 import { python_api } from '../../utils';
-
-type SelectMenuProps = {
-    label: string;
-    id: string;
-    values: null | Array<string>;
-};
-
-function SelectMenu({ label, id, values }: SelectMenuProps) {
-    const labelId = `${id}-select-label`;
-    let items =
-        values?.map((value, n) => (
-            <MenuItem key={n + 1} value={value}>
-                {value}
-            </MenuItem>
-        )) || [];
-    items = [
-        <MenuItem key={0}>
-            <em>None</em>
-        </MenuItem>,
-        ...items,
-    ];
-    return (
-        <FormControl
-            sx={{ mr: 1, ml: 1, pb: 2, minWidth: 120 }}
-            variant="standard"
-        >
-            <InputLabel id={labelId}>{label}</InputLabel>
-            <Select label={label} labelId={labelId}>
-                {items}
-            </Select>
-        </FormControl>
-    );
-}
-type MainDropDownMenuProps = {
-    children: ReactNode;
-    onClose?: () => void;
-};
-
-function MainDropDownMenu({ children, onClose }: MainDropDownMenuProps) {
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const openMenu = (event: React.MouseEvent<HTMLElement>) => {
-        setAnchorEl(event.currentTarget);
-    };
-    const closeMenu = () => {
-        setAnchorEl(null);
-        if (onClose) {
-            onClose();
-        }
-    };
-
-    return (
-        <>
-            <IconButton
-                size="large"
-                edge="start"
-                color="inherit"
-                aria-label="menu"
-                sx={{ mr: 2 }}
-                onClick={openMenu}
-            >
-                <MenuIcon />
-            </IconButton>
-            <Menu
-                anchorEl={anchorEl}
-                anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left',
-                }}
-                keepMounted
-                open={Boolean(anchorEl)}
-                onClose={closeMenu}
-            >
-                {React.Children.map(children, (child) =>
-                    React.cloneElement(child as React.ReactElement, {
-                        onClick: () => {
-                            const parentOnClick = (child as React.ReactElement)
-                                .props.onClick;
-                            if (parentOnClick) {
-                                parentOnClick();
-                            }
-                            closeMenu();
-                        },
-                    }),
-                )}
-            </Menu>
-        </>
-    );
-}
+import SelectMenu from '../generic/SelectMenu';
+import BurgerMenu from '../generic/BurgerMenu';
 
 export default function PlotMenu() {
     const [sourceFile, setSourceFile] = useState<null | string>(null);
@@ -120,9 +29,9 @@ export default function PlotMenu() {
         <Box sx={{ flexGrow: 1 }}>
             <AppBar position="static"></AppBar>
             <Toolbar>
-                <MainDropDownMenu>
+                <BurgerMenu>
                     <MenuItem onClick={onLoadFileClick}>Load File</MenuItem>
-                </MainDropDownMenu>
+                </BurgerMenu>
                 <IconButton>
                     {Boolean(sourceFile) && (
                         <Tooltip title={sourceFile}>

@@ -7,7 +7,7 @@ import PlotMenu from './PlotMenu';
 import React from 'react';
 
 describe('PlotMenu', () => {
-    test('render PlotMenu', async () => {
+    it('should render', async () => {
         render(<PlotMenu />);
     });
 });
