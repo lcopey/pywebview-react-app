@@ -9,13 +9,19 @@ type BurgerMenuProps = {
 
 export default function BurgerMenu({ children, onClose }: BurgerMenuProps) {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const openMenu = (event: React.MouseEvent<HTMLElement>) => {
+    const handleIconClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
     };
     const closeMenu = () => {
         setAnchorEl(null);
         if (onClose) {
             onClose();
+        }
+    };
+    const handleMenuClick = (event: React.MouseEvent) => {
+        if (anchorEl) {
+            closeMenu();
+            event.stopPropagation();
         }
     };
 
@@ -27,7 +33,7 @@ export default function BurgerMenu({ children, onClose }: BurgerMenuProps) {
                 color="inherit"
                 aria-label="menu"
                 sx={{ mr: 2 }}
-                onClick={openMenu}
+                onClick={handleIconClick}
             >
                 <MenuIcon />
             </IconButton>
@@ -40,19 +46,9 @@ export default function BurgerMenu({ children, onClose }: BurgerMenuProps) {
                 keepMounted
                 open={Boolean(anchorEl)}
                 onClose={closeMenu}
+                onClick={handleMenuClick}
             >
-                {React.Children.map(children, (child) =>
-                    React.cloneElement(child as React.ReactElement, {
-                        onClick: () => {
-                            const parentOnClick = (child as React.ReactElement)
-                                .props.onClick;
-                            if (parentOnClick) {
-                                parentOnClick();
-                            }
-                            closeMenu();
-                        },
-                    }),
-                )}
+                {children}
             </Menu>
         </>
     );
