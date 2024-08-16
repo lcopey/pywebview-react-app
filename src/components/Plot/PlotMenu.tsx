@@ -8,9 +8,9 @@ import {
 } from '@mui/material';
 import FilePresent from '@mui/icons-material/FilePresent';
 import { useState } from 'react';
-import { python_api } from '../../utils';
-import SelectMenu from '../generic/SelectMenu';
-import BurgerMenu from '../generic/BurgerMenu';
+import { python_api } from '@/utils';
+import SelectMenu from '@/components/generic/SelectMenu';
+import BurgerMenu from '@/components/generic/BurgerMenu';
 
 export default function PlotMenu() {
     const [sourceFile, setSourceFile] = useState<null | string>(null);

@@ -10,7 +10,7 @@
     "watch": "vite build --watch",
     "lint": "eslint .",
     "preview": "vite preview",
-    "pretty": "npx prettier ./src --write && ruff format ./src"
+    "pretty": "npx prettier ./src --write && ruff format ./python_src"
   },
   "dependencies": {
     "@emotion/react": "^11.13.0",
