@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import PlotMenu from './PlotMenu';
+import Plot from './Plot';
 
 // jest.mock('../../utils', () => ({
 //     python_api: () => ({
@@ -15,12 +15,12 @@ import PlotMenu from './PlotMenu';
 
 describe('PlotMenu', () => {
     it('should render', async () => {
-        const container = render(<PlotMenu />);
+        const container = render(<Plot />);
         fireEvent.click(container.getByRole('button', { name: 'menu' }));
 
         await act(async () => {
             fireEvent.click(
-                screen.getByRole('menuitem', { name: 'Load File' }),
+                screen.getByRole('menuitem', { name: 'Open File' }),
             );
         });
     });

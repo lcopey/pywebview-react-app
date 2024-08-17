@@ -1,19 +1,22 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ],
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "esModuleInterop": true
-  }
+    "files": [],
+    "references": [
+        { "path": "./tsconfig.app.json" },
+        { "path": "./tsconfig.node.json" }
+    ],
+    "compilerOptions": {
+        "jsx": "react-jsx",
+        "esModuleInterop": true,
+        "paths": {
+            "@app/*": ["./src/*"]
+        }
+    }
     // "compilerOptions": {
     //   "target": "ES2022",
     //   "lib": ["ES2023"],
     //   "module": "ESNext",
     //   "skipLibCheck": true,
-  
+
     //   /* Bundler mode */
     //   "moduleResolution": "bundler",
     //   "allowImportingTsExtensions": true,
@@ -31,5 +34,4 @@
     //   "esModuleInterop": true
     // },
     // "include": ["vite.config.ts", ]
-  
 }

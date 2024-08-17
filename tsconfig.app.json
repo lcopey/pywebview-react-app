@@ -21,7 +21,7 @@
         "noUnusedParameters": true,
         "noFallthroughCasesInSwitch": true,
         /* Paths */
-        "paths": { "@/*": ["./src/*"] }
+        "paths": { "@app/*": ["./src/*"] }
     },
-    "include": ["src"]
+    "include": ["src"],
 }
