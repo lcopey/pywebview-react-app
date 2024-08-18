@@ -13,38 +13,99 @@ import {
 } from '@mui/material';
 import FilePresent from '@mui/icons-material/FilePresent';
 import FileOpen from '@mui/icons-material/FileOpen';
-// import { useState } from 'react';
-import { usePersistedState } from '@app/utils';
+import React, { useReducer, Dispatch } from 'react';
+// import { usePersistedState } from '@app/utils';
 import { python_api } from '@app/utils';
 import SelectMenu from '@app/components/generic/SelectMenu';
 import BurgerMenu from '@app/components/generic/BurgerMenu';
 
-import Figure from 'react-plotly.js';
+import Figure, { PlotParams } from 'react-plotly.js';
 
-type ScatterPlotToolBarT = {
-    sourceFile: null | string;
-    axis: null | Array<string>;
-    title: string;
-    onTitleChange: (title: string) => void;
+type IPlotParams = {
+    figure: PlotParams;
+    toolbar: {
+        sourceFile?: string;
+        columns?: Array<string>;
+        [key: string]: unknown;
+    };
 };
-function ScatterPlotToolBar({
-    sourceFile,
-    axis,
-    onTitleChange,
-    title = '',
-}: ScatterPlotToolBarT) {
+
+// type IPlotParams = {
+//     data: Array<{ [key: string]: unknown }>;
+//     layout: { [key: string]: unknown };
+//     state: {
+//         sourceFile?: string;
+//         [key: string]: unknown;
+//     };
+// };
+type IAction = {
+    type: 'load-file' | 'title-change' | 'xaxis-change';
+    title?: string;
+    columns?: Array<string>;
+    sourceFile?: string;
+};
+
+type BasePlotProps = {
+    loadFile: () => void;
+    plotParams: IPlotParams;
+    dispatch: Dispatch<IAction>;
+    toolbarComponent: (props: ToolbarProps) => JSX.Element;
+};
+function BasePlot({
+    loadFile,
+    plotParams,
+    dispatch,
+    toolbarComponent,
+}: BasePlotProps) {
+    // const defaultLayout = {
+    //     width: '100%',
+    //     height: '100%',
+    // };
+    const { data, layout } = plotParams.figure;
+    const state = plotParams.toolbar;
+    return (
+        <Stack spacing={2} direction={'column'}>
+            <Box sx={{ flexGrow: 1 }}>
+                <AppBar position="static"></AppBar>
+                <Toolbar>
+                    <BurgerMenu>
+                        <MenuItem onClick={loadFile}>
+                            <ListItemIcon>
+                                <FileOpen />
+                            </ListItemIcon>
+                            <ListItemText>Open File</ListItemText>
+                        </MenuItem>
+                    </BurgerMenu>
+                    <IconButton>
+                        {Boolean(state.sourceFile) && (
+                            <Tooltip title={state.sourceFile}>
+                                <FilePresent />
+                            </Tooltip>
+                        )}
+                    </IconButton>
+                    {React.createElement(toolbarComponent, {
+                        dispatch: dispatch,
+                        plotParams: plotParams,
+                    })}
+                </Toolbar>
+            </Box>
+            <Figure data={data} layout={layout} />
+        </Stack>
+    );
+}
+
+type ToolbarProps = {
+    dispatch: Dispatch<IAction>;
+    plotParams: IPlotParams;
+};
+function ScatterPlotToolBar({ dispatch, plotParams }: ToolbarProps) {
     const variant = 'standard' as TextFieldVariants;
     const sx = { mr: 1, ml: 1, pb: 2, minWidth: 120 };
     const defaultProps = { variant: variant, sx: sx };
+
+    const { columns: axis, title } = plotParams.toolbar;
     return (
         <>
-            <IconButton>
-                {Boolean(sourceFile) && (
-                    <Tooltip title={sourceFile}>
-                        <FilePresent />
-                    </Tooltip>
-                )}
-            </IconButton>
             {Boolean(axis) && (
                 <>
                     <TextField
@@ -53,7 +114,10 @@ function ScatterPlotToolBar({
                         onChange={(
                             e: React.ChangeEvent<HTMLTextAreaElement>,
                         ) => {
-                            onTitleChange(e.target.value);
+                            dispatch({
+                                type: 'title-change',
+                                title: e.target.value,
+                            });
                         }}
                         {...defaultProps}
                     ></TextField>
@@ -75,54 +139,59 @@ function ScatterPlotToolBar({
     );
 }
 
-export default function Plot() {
-    const [sourceFile, setSourceFile] = usePersistedState<null | string>(
-        null,
-        'sourceFile',
-        'session',
-    );
-    const [columns, setColums] = usePersistedState<null | Array<string>>(
-        null,
-        'columns',
-        'session',
-    );
-    const [title, setTitle] = usePersistedState<string>(
-        '',
-        'title',
-        'session'
-    );
+function plotParamsReducer(
+    plotParams: IPlotParams,
+    action: IAction,
+): IPlotParams {
+    switch (action.type) {
+        case 'load-file':
+            return {
+                figure: plotParams.figure,
+                toolbar: {
+                    columns: action.columns,
+                    sourceFile: action.sourceFile,
+                },
+            };
+        case 'title-change':
+            return {
+                figure: {
+                    ...plotParams.figure,
+                    layout: {
+                        ...plotParams.figure.layout,
+                        title: action.title,
+                    },
+                },
+                toolbar: plotParams.toolbar,
+            };
+        default:
+            return plotParams;
+    }
+}
 
-    const onLoadFileClick = () => {
+export default function PlotSection() {
+    const [plotParams, dispatch] = useReducer(plotParamsReducer, {
+        figure: { data: [], layout: {} },
+        toolbar: {},
+    });
+
+    const handleFileLoad = () => {
         python_api()
             ?.plot_api.load_file()
-            .then(({ file_path, columns }) => {
-                setSourceFile(file_path);
-                setColums(columns);
+            .then((results) => {
+                dispatch({
+                    type: 'load-file',
+                    columns: results.columns,
+                    sourceFile: results.file_path,
+                });
             });
     };
 
     return (
-        <Stack spacing={2} direction={'column'}>
-            <Box sx={{ flexGrow: 1 }}>
-                <AppBar position="static"></AppBar>
-                <Toolbar>
-                    <BurgerMenu>
-                        <MenuItem onClick={onLoadFileClick}>
-                            <ListItemIcon>
-                                <FileOpen />
-                            </ListItemIcon>
-                            <ListItemText>Open File</ListItemText>
-                        </MenuItem>
-                    </BurgerMenu>
-                    <ScatterPlotToolBar
-                        sourceFile={sourceFile}
-                        axis={columns}
-                        title={title}
-                        onTitleChange={setTitle}
-                    />
-                </Toolbar>
-            </Box>
-            <Figure data={[]} layout={{ title: title }} />
-        </Stack>
+        <BasePlot
+            loadFile={handleFileLoad}
+            plotParams={plotParams}
+            dispatch={dispatch}
+            toolbarComponent={ScatterPlotToolBar}
+        />
     );
 }

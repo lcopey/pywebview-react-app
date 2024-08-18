@@ -9,7 +9,7 @@ import {
 type SelectMenuProps = {
     label: string;
     id: string;
-    values: null | Array<string>;
+    values?: null | Array<string>;
     variant?: 'standard' | 'outlined' | 'filled' | undefined;
     sx?: SxProps;
 };
@@ -17,7 +17,7 @@ type SelectMenuProps = {
 export default function SelectMenu({
     label,
     id,
-    values,
+    values = null,
     variant = 'standard',
     sx = {},
 }: SelectMenuProps) {

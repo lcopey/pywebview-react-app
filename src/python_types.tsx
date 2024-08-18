@@ -1,5 +1,6 @@
+export type LoadFileResultsT = { file_path: string; columns: Array<string> };
 interface PlotApi {
-    load_file: () => Promise<{ file_path: string; columns: Array<string> }>;
+    load_file: () => Promise<LoadFileResultsT>;
 }
 
 export default interface PythonApi {

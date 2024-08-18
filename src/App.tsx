@@ -1,14 +1,14 @@
 import { AppBar, Box, Toolbar, IconButton } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import Scatter from '@mui/icons-material/ScatterPlot';
-import Home from '@/pages/Home';
-import Plot from '@/pages/Plot';
+import Home from '@app/pages/Home';
+import Plot from '@app/pages/Plot';
 import {
     RouteProvider,
     useRoute,
     ROUTE,
     useSetRoute,
-} from '@/components/generic/Router';
+} from '@app/components/generic/Router';
 
 type NavButtonProps = { route: string; icon: JSX.Element };
 function NavButton({ route, icon }: NavButtonProps) {
@@ -16,7 +16,7 @@ function NavButton({ route, icon }: NavButtonProps) {
     const currentRoute = useRoute();
     return (
         <IconButton
-            onClick={(_) => setRoute(route)}
+            onClick={() => setRoute(route)}
             color={route === currentRoute ? 'primary' : 'default'}
         >
             {icon}
