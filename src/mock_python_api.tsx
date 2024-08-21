@@ -12,6 +12,12 @@ const MockApi: PythonApi = {
                 columns: ['col1', 'col2', 'col3'],
             });
         },
+        plot_histogram: () => {
+            return asPromise(`{
+                data: [{ type: 'histogram', x: [0, 1, 2] }],
+                layout: {},
+            }`);
+        },
     },
 };
 

@@ -2,6 +2,8 @@ import webview
 import os
 import pandas as pd
 from typing import Any, Literal, TypedDict
+from dataclasses import dataclass
+import plotly.express as px
 
 CALLBACKS = Literal["setFileSource"]
 
@@ -10,6 +12,10 @@ class PlotApi:
     class LoadFileResponse(TypedDict):
         file_path: str
         columns: list[str]
+
+
+class AppDatas:
+    dataframe: pd.DataFrame
 
 
 def _path(path: str):
@@ -36,20 +42,26 @@ def setJsValue(value: Any, callback_name: CALLBACKS):
 
 
 class PlotApi:
+    def __init__(self) -> None:
+        self.datas = None
+
     def load_file(self) -> PlotApi.LoadFileResponse:
         window = webview.windows[0]
         file = window.create_file_dialog(webview.OPEN_DIALOG)
         file = file[0]
-        datas = pd.read_csv(file)
-        return {"file_path": file, "columns": list(datas.columns)}
-        # setJsValue(file[0], "setFileSource")
+        self.datas = pd.read_csv(file)
+        return {"file_path": file, "columns": list(self.datas.columns)}
+
+    def plot_histogram(self, xaxis: str):
+        results = px.histogram(self.datas, x=xaxis)
+        return results.to_json()
 
 
 class Api:
     plot_api = PlotApi()
 
 
-DEBUG = True
+DEBUG = False
 
 if __name__ == "__main__":
     gui_path = _path("../dist/index.html")
