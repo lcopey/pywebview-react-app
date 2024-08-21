@@ -1,24 +1,25 @@
 import {
-    AppBar,
     Box,
-    IconButton,
     Toolbar,
-    MenuItem,
     Tooltip,
     ListItemIcon,
     ListItemText,
     TextField,
     TextFieldVariants,
-    Stack,
+    List,
+    ListItem,
+    ListItemButton,
+    Divider,
+    useTheme,
 } from '@mui/material';
+import MuiDrawer from '@mui/material/Drawer';
 import FilePresent from '@mui/icons-material/FilePresent';
 import FileOpen from '@mui/icons-material/FileOpen';
+import { styled } from '@mui/material/styles';
 import React, { useReducer, Dispatch } from 'react';
 // import { usePersistedState } from '@app/utils';
 import { python_api } from '@app/utils';
 import SelectMenu from '@app/components/generic/SelectMenu';
-import BurgerMenu from '@app/components/generic/BurgerMenu';
-
 import Figure, { PlotParams } from 'react-plotly.js';
 
 type IPlotParams = {
@@ -30,20 +31,41 @@ type IPlotParams = {
     };
 };
 
-// type IPlotParams = {
-//     data: Array<{ [key: string]: unknown }>;
-//     layout: { [key: string]: unknown };
-//     state: {
-//         sourceFile?: string;
-//         [key: string]: unknown;
-//     };
-// };
+type ActionType = 'load-file' | 'title-change' | 'xaxis-change';
 type IAction = {
-    type: 'load-file' | 'title-change' | 'xaxis-change';
+    type: ActionType;
     title?: string;
     columns?: Array<string>;
     sourceFile?: string;
 };
+
+const drawerWidth = 250;
+const Drawer = styled(MuiDrawer, {
+    shouldForwardProp: (prop) => prop !== 'open',
+})(({ theme, open }) => ({
+    flex: '0 0 auto',
+    width: drawerWidth,
+    whiteSpace: 'nowrap',
+    [`& .MuiDrawer-paper`]: {
+        boxSizing: 'border-box',
+        width: drawerWidth,
+        ...(open && {
+            width: drawerWidth,
+            transition: theme.transitions.create('width', {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.enteringScreen,
+            }),
+        }),
+        ...(!open && {
+            width: 0,
+            // width: `calc(${theme.spacing(7)} + 1px)`,
+            transition: theme.transitions.create('width', {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.leavingScreen,
+            }),
+        }),
+    },
+}));
 
 type BasePlotProps = {
     loadFile: () => void;
@@ -57,40 +79,66 @@ function BasePlot({
     dispatch,
     toolbarComponent,
 }: BasePlotProps) {
-    // const defaultLayout = {
-    //     width: '100%',
-    //     height: '100%',
-    // };
     const { data, layout } = plotParams.figure;
     const state = plotParams.toolbar;
-    return (
-        <Stack spacing={2} direction={'column'}>
-            <Box sx={{ flexGrow: 1 }}>
-                <AppBar position="static"></AppBar>
-                <Toolbar>
-                    <BurgerMenu>
-                        <MenuItem onClick={loadFile}>
+    const theme = useTheme();
+    const open = true;
+
+    const toolbar = (
+        <>
+            <List>
+                <Divider />
+                <ListItemButton onClick={loadFile}>
+                    <ListItemIcon>
+                        <FileOpen />
+                    </ListItemIcon>
+                    <ListItemText>Open File</ListItemText>
+                </ListItemButton>
+                {Boolean(state.sourceFile) && (
+                    <Tooltip title={state.sourceFile}>
+                        <ListItem>
                             <ListItemIcon>
-                                <FileOpen />
-                            </ListItemIcon>
-                            <ListItemText>Open File</ListItemText>
-                        </MenuItem>
-                    </BurgerMenu>
-                    <IconButton>
-                        {Boolean(state.sourceFile) && (
-                            <Tooltip title={state.sourceFile}>
                                 <FilePresent />
-                            </Tooltip>
-                        )}
-                    </IconButton>
-                    {React.createElement(toolbarComponent, {
-                        dispatch: dispatch,
-                        plotParams: plotParams,
-                    })}
-                </Toolbar>
+                            </ListItemIcon>
+                            <ListItemText>{state.sourceFile}</ListItemText>
+                        </ListItem>
+                    </Tooltip>
+                )}
+            </List>
+            <List>
+                {React.createElement(toolbarComponent, {
+                    dispatch: dispatch,
+                    plotParams: plotParams,
+                })}
+            </List>
+        </>
+    );
+    return (
+        <>
+            <Drawer open={open} variant="permanent">
+                <Toolbar />
+                <Box>{toolbar}</Box>
+            </Drawer>
+            <Box
+                sx={{
+                    flexGrow: 1,
+                    mt: `${theme.mixins.toolbar.minHeight}px`,
+                    pt: 1,
+                    height: `calc(100vh - ${theme.mixins.toolbar.minHeight}px)`,
+                }}
+                component="main"
+            >
+                <Figure
+                    data={data}
+                    layout={{ ...layout, autosize: true }}
+                    useResizeHandler={true}
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                    }}
+                />
             </Box>
-            <Figure data={data} layout={layout} />
-        </Stack>
+        </>
     );
 }
 
@@ -100,7 +148,7 @@ type ToolbarProps = {
 };
 function ScatterPlotToolBar({ dispatch, plotParams }: ToolbarProps) {
     const variant = 'standard' as TextFieldVariants;
-    const sx = { mr: 1, ml: 1, pb: 2, minWidth: 120 };
+    const sx = { width: '100%' };
     const defaultProps = { variant: variant, sx: sx };
 
     const { columns: axis, title } = plotParams.toolbar;
@@ -108,31 +156,38 @@ function ScatterPlotToolBar({ dispatch, plotParams }: ToolbarProps) {
         <>
             {Boolean(axis) && (
                 <>
-                    <TextField
-                        label="title"
-                        value={title}
-                        onChange={(
-                            e: React.ChangeEvent<HTMLTextAreaElement>,
-                        ) => {
-                            dispatch({
-                                type: 'title-change',
-                                title: e.target.value,
-                            });
-                        }}
-                        {...defaultProps}
-                    ></TextField>
-                    <SelectMenu
-                        label="x-axis"
-                        id="xaxis"
-                        values={axis}
-                        {...defaultProps}
-                    />
-                    <SelectMenu
-                        label="y-axis"
-                        id="yaxis"
-                        values={axis}
-                        {...defaultProps}
-                    />
+                    <Divider />
+                    <ListItem>
+                        <TextField
+                            label="title"
+                            value={title}
+                            onChange={(
+                                e: React.ChangeEvent<HTMLTextAreaElement>,
+                            ) => {
+                                dispatch({
+                                    type: 'title-change',
+                                    title: e.target.value,
+                                });
+                            }}
+                            {...defaultProps}
+                        />
+                    </ListItem>
+                    <ListItem>
+                        <SelectMenu
+                            label="x-axis"
+                            id="xaxis"
+                            values={axis}
+                            {...defaultProps}
+                        />
+                    </ListItem>
+                    <ListItem>
+                        <SelectMenu
+                            label="y-axis"
+                            id="yaxis"
+                            values={axis}
+                            {...defaultProps}
+                        />
+                    </ListItem>
                 </>
             )}
         </>

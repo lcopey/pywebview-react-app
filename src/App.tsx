@@ -1,4 +1,4 @@
-import { AppBar, Box, Toolbar, IconButton } from '@mui/material';
+import { Box, Toolbar, IconButton, CssBaseline, AppBar } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import Scatter from '@mui/icons-material/ScatterPlot';
 import Home from '@app/pages/Home';
@@ -17,23 +17,13 @@ function NavButton({ route, icon }: NavButtonProps) {
     return (
         <IconButton
             onClick={() => setRoute(route)}
-            color={route === currentRoute ? 'primary' : 'default'}
+            sx={{
+                color:
+                    route === currentRoute ? 'primary.light' : 'default.light',
+            }}
         >
             {icon}
         </IconButton>
-    );
-}
-
-function NavBar() {
-    return (
-        <Box sx={{ flexGrow: 1 }}>
-            <AppBar position="static" color="transparent" elevation={1}>
-                <Toolbar>
-                    <NavButton route={ROUTE.home} icon={<HomeIcon />} />
-                    <NavButton route={ROUTE.plot} icon={<Scatter />} />
-                </Toolbar>
-            </AppBar>
-        </Box>
     );
 }
 
@@ -52,19 +42,32 @@ function AppContent() {
             inner = <Home />;
     }
     return (
-        <>
-            <NavBar />
+        <Box sx={{ display: 'flex' }}>
+            <AppBar
+                sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+                position="fixed"
+                // color="transparent"
+                elevation={2}
+            >
+                <CssBaseline />
+                <Toolbar>
+                    <NavButton route={ROUTE.home} icon={<HomeIcon />} />
+                    <NavButton route={ROUTE.plot} icon={<Scatter />} />
+                </Toolbar>
+            </AppBar>
             {inner}
-        </>
+        </Box>
     );
 }
 
-function App() {
+// const theme = createTheme({
+//     palette: { active: { main: '#FFFFFF', light: '#FFFFFF', dark: '#000000' } },
+// });
+
+export default function App() {
     return (
         <RouteProvider>
             <AppContent />
         </RouteProvider>
     );
 }
-
-export default App;
