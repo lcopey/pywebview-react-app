@@ -21,6 +21,9 @@ import React, { useReducer, Dispatch, useState } from 'react';
 import { python_api } from '@app/utils';
 import SelectMenu from '@app/components/generic/SelectMenu';
 import Figure, { PlotParams as FigureParams } from 'react-plotly.js';
+import { Template } from 'plotly.js';
+import { useColorMode } from '@app/components/utils/ColorMode';
+import { plotlyWhite, plotlyDark } from './PlotlyTemplate.json';
 
 // enum ActionTypeEnum  {
 //     loadFile = 'load-file',
@@ -113,7 +116,10 @@ export default function PlotSection() {
     const { data, layout } = params.figure;
     const { sourceFile, plotType } = params.toolbar;
     const theme = useTheme();
+    const { colorMode } = useColorMode();
     const open = true;
+
+    const template = colorMode == 'light' ? plotlyWhite : plotlyDark;
 
     const handleFileLoad = () => {
         python_api()
@@ -194,7 +200,11 @@ export default function PlotSection() {
             >
                 <Figure
                     data={data}
-                    layout={{ ...layout, autosize: true }}
+                    layout={{
+                        ...layout,
+                        autosize: true,
+                        template: template as unknown as Template,
+                    }}
                     useResizeHandler={true}
                     style={{
                         width: '100%',

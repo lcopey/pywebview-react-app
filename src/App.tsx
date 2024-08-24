@@ -1,34 +1,49 @@
-import { Box, Toolbar, IconButton, CssBaseline, AppBar } from '@mui/material';
+import {
+    Box,
+    Toolbar,
+    IconButton,
+    CssBaseline,
+    AppBar,
+    Typography,
+    useTheme,
+} from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 import Scatter from '@mui/icons-material/ScatterPlot';
 import Home from '@app/pages/Home';
 import Plot from '@app/pages/Plot';
-import {
-    RouteProvider,
-    useRoute,
-    ROUTE,
-    useSetRoute,
-} from '@app/components/generic/Router';
+import { RouteProvider, useRoute, ROUTE } from '@app/components/utils/Router';
+import SelectMenu from './components/generic/SelectMenu';
+import { LocaleProvider, useLocale } from '@app/components/utils/Locale';
+import { useColorMode, ColorModeProvider } from './components/utils/ColorMode';
 
 type NavButtonProps = { route: string; icon: JSX.Element };
 function NavButton({ route, icon }: NavButtonProps) {
-    const setRoute = useSetRoute();
-    const currentRoute = useRoute();
+    const { setRoute, currentRoute } = useRoute();
+
     return (
-        <IconButton
-            onClick={() => setRoute(route)}
-            sx={{
-                color:
-                    route === currentRoute ? 'primary.light' : 'default.light',
-            }}
-        >
-            {icon}
-        </IconButton>
+        <>
+            <IconButton
+                onClick={() => setRoute(route)}
+                sx={{
+                    color:
+                        route === currentRoute
+                            ? 'primary.light'
+                            : 'default.light',
+                }}
+            >
+                {icon}
+            </IconButton>
+        </>
     );
 }
 
 function AppContent() {
-    const route = useRoute();
+    const { currentRoute: route } = useRoute();
+    const theme = useTheme();
+    const { toggleColorMode } = useColorMode();
+    const { locale, setLocale } = useLocale();
 
     let inner: null | JSX.Element = null;
     switch (route) {
@@ -53,6 +68,28 @@ function AppContent() {
                 <Toolbar>
                     <NavButton route={ROUTE.home} icon={<HomeIcon />} />
                     <NavButton route={ROUTE.plot} icon={<Scatter />} />
+                    <Typography flexGrow={1} />
+                    <SelectMenu
+                        label="lng"
+                        id="lng"
+                        value={locale}
+                        values={['en', 'fr']}
+                        includeNull={false}
+                        onChange={(e) => {
+                            setLocale(e.target.value as string);
+                        }}
+                    />
+                    <IconButton
+                        sx={{ ml: 1 }}
+                        onClick={toggleColorMode}
+                        color="inherit"
+                    >
+                        {theme.palette.mode === 'dark' ? (
+                            <Brightness7Icon />
+                        ) : (
+                            <Brightness4Icon />
+                        )}
+                    </IconButton>
                 </Toolbar>
             </AppBar>
             {inner}
@@ -60,14 +97,14 @@ function AppContent() {
     );
 }
 
-// const theme = createTheme({
-//     palette: { active: { main: '#FFFFFF', light: '#FFFFFF', dark: '#000000' } },
-// });
-
 export default function App() {
     return (
-        <RouteProvider>
-            <AppContent />
-        </RouteProvider>
+        <LocaleProvider>
+            <ColorModeProvider>
+                <RouteProvider>
+                    <AppContent />
+                </RouteProvider>
+            </ColorModeProvider>
+        </LocaleProvider>
     );
 }
