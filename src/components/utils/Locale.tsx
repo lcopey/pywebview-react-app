@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useContext, createContext, ReactNode, useState } from 'react';
+import { useContext, createContext, ReactNode, useState, useMemo } from 'react';
 
 type ILocaleContext = {
     locale: string;
@@ -30,10 +30,12 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
      *
      * @param {string} locale - La nouvelle locale à définir.
      */
-    const handleLocaleChange = (locale: string) => {
-        setLocale(locale);
-        i18n.changeLanguage(locale);
-    };
+    const handleLocaleChange = useMemo(() => {
+        return (locale: string) => {
+            setLocale(locale);
+            i18n.changeLanguage(locale);
+        };
+    }, []);
 
     return (
         <localeContext.Provider
